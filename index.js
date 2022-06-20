@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let phonebook = [
     { 
       "id": 1,
@@ -24,7 +26,7 @@ let phonebook = [
     }
 ]
 
-app.get('/', (request,response) => {
+app.get('/', (request, response) => {
     response.send(`
     <div>
     <p>For phonebook data, navigate to ./api/persons</p>
@@ -33,7 +35,7 @@ app.get('/', (request,response) => {
     `)
 })
 
-app.get('/api/persons', (request,response) => {
+app.get('/api/persons', (request, response) => {
     response.json(phonebook)
 })
 
@@ -46,6 +48,29 @@ app.get('/api/persons/:id', (request, response) => {
     } else {
         response.status(404).end()
     }
+})
+
+app.post('/api/persons', (request, response) => {
+    const body = request.body
+
+    if (!body.name) {
+        return response.status(400).json({
+            error: 'name missing'
+        })
+    } else if (!body.number) {
+        return response.status(400).json({
+            error: 'number missing'
+        })
+    }
+
+    newPerson = {
+        name: body.name,
+        number: body.number,
+        id: Math.floor(Math.random() * 1000000)
+    }
+    
+    phonebook = phonebook.concat(newPerson)
+    response.json(newPerson)
 })
 
 app.delete('/api/persons/:id', (request, response) => {
