@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 
-let persons = [
+let phonebook = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -25,11 +25,25 @@ let persons = [
 ]
 
 app.get('/', (request,response) => {
-    response.send('<p>For data, navigate to ./api/persons</p>')
+    response.send(`
+    <div>
+    <p>For phonebook data, navigate to ./api/persons</p>
+    <p>For phonebook stats, navigate to ./info</p>
+    </div>
+    `)
 })
 
 app.get('/api/persons', (request,response) => {
-    response.json(persons)
+    response.json(phonebook)
+})
+
+app.get('/info', (request,response) => {
+    response.send(`
+        <div>
+        <p>Phonebook has info for ${phonebook.length} people</p>
+        <p>${new Date()}</p>
+        </div>
+    `)
 })
 
 const PORT = 3001
