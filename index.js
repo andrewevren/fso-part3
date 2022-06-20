@@ -61,6 +61,10 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({
             error: 'number missing'
         })
+    } else if (phonebook.find(n => n.name.toLowerCase() === body.name.toLowerCase())) {
+        return response.status(400).json({
+            error: 'name must be unique'
+        })
     }
 
     newPerson = {
