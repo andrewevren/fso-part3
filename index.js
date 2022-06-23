@@ -32,14 +32,19 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    Person.findById(request.params.id).then(person => {
-        response.json(person)
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+        .then(person => {
+            if (person) {
+                response.json(person)
+            } else {
+                response.status(404).send({ error: 'There is no note in the database with the given id' })
+            }
     })
-        .catch(error => console.log(error.message))
+        .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (!body.name) {
@@ -60,22 +65,43 @@ app.post('/api/persons', (request, response) => {
     newPerson.save().then(savedEntry => {
         response.json(savedEntry)
     })
+        .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    
-    phonebook = phonebook.filter(n => n.id !== id)
-    response.status(204).end()
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    const replacement = {
+        name: body.name,
+        number: body.number
+    }
+
+    Person.findByIdAndUpdate(request.params.id, replacement, { new : true })
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 
-app.get('/info', (request,response) => {
-    response.send(`
-        <div>
-        <p>Phonebook has info for ${phonebook.length} people</p>
-        <p>${new Date()}</p>
-        </div>
-    `)
+app.delete('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndRemove(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
+})
+
+app.get('/info', (request,response, next) => {
+    Person.estimatedDocumentCount()
+        .then(count => {
+            response.send(
+                `<div>
+                <p>Phonebook has info for ${count} people</p>
+                <p>${new Date()}</p>
+                </div>`
+            )
+        })
+        .catch(error => next(error))
 })
 
 const PORT = process.env.PORT
