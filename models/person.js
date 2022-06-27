@@ -8,6 +8,10 @@ mongoose.connect(process.env.MONGODB_URI)
         console.log(`error connecting to MongoBD: ${error.message}`)
     })
 
+function validator (v) {
+    return /^(\d{2,3})[- ]?(\d+)$/.test(v)
+}
+
 const personSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -16,6 +20,8 @@ const personSchema = new mongoose.Schema({
     },
     number: {
         type: String,
+        minLength: 8,
+        validate: validator,
         required: true
     }
 })

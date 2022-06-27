@@ -38,7 +38,7 @@ app.get('/api/persons/:id', (request, response, next) => {
             if (person) {
                 response.json(person)
             } else {
-                response.status(404).send({ error: 'There is no note in the database with the given id' })
+                response.status(404).send({ error: 'There is no person in the database with the given id' })
             }
     })
         .catch(error => next(error))
@@ -47,15 +47,22 @@ app.get('/api/persons/:id', (request, response, next) => {
 app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
-    newPerson = new Person({
-        name: body.name,
-        number: body.number
-    })
-    
-    newPerson.save().then(savedEntry => {
-        response.json(savedEntry)
-    })
-        .catch(error => next(error))
+    Person.find({name: body.name})
+        .then(person => {
+            if (person.length) {
+                response.status(400).send({error: 'There is already a person with that name in the database'})
+            } else {
+                newPerson = new Person({
+                    name: body.name,
+                    number: body.number
+                })
+                
+                newPerson.save().then(savedEntry => {
+                    response.json(savedEntry)
+                })
+                    .catch(error => next(error))
+            }
+        })
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
